@@ -1,0 +1,52 @@
+[project]
+name = "oxylabs-ai-studio"
+version = "0.1.0"
+description = "Oxylabs studio python sdk"
+readme = "README.md"
+keywords = ["oxylabs", "ai", "studio"]
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.15.0",
+    "ruff>=0.11.9",
+    "twine>=6.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/oxylabs_ai_studio"]
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+  # default
+  "E",      # pycodestyle error
+  "F",      # flake8 error
+  "A",      # builtin shadowing
+  "B",      # flake8 bugbear
+  "BLE",    # aboid bare excepts
+  "C4",     # simplify comprehensions
+  "DTZ",    # datetime errors
+  "I",      # isort imports
+  "N",      # conform to PEP8 naming rules
+  "RET",    # return values
+  "S",      # bandit
+  "UP",     # upgade syntax
+  "W",      # pycodestyle warning
+  "YTT",    # wrong usage of sys.info
+]
