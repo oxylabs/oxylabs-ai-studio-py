@@ -1,23 +1,29 @@
 import asyncio
 import time
-from typing import Any
 
 from pydantic import BaseModel
 
 from oxylabs_ai_studio.client import OxyStudioAIClient
 from oxylabs_ai_studio.logger import get_logger
 
-SEARCH_TIMEOUT_SECONDS = 60 * 1
+SEARCH_TIMEOUT_SECONDS = 60 * 3
 POLL_INTERVAL_SECONDS = 2
 POLL_MAX_ATTEMPTS = SEARCH_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
 logger = get_logger(__file__)
 
 
+class SearchResult(BaseModel):
+    url: str
+    title: str
+    description: str
+    content: str | None
+
+
 class AiSearchJob(BaseModel):
     run_id: str
     message: str | None = None
-    data: dict[str, Any] | str | None
+    data: list[SearchResult] | None
 
 
 class AiSearch(OxyStudioAIClient):
@@ -42,7 +48,7 @@ class AiSearch(OxyStudioAIClient):
             "render_html": render_javascript,
             "return_content": return_content,
         }
-        create_response = self.client.post(url="/search", json=body)
+        create_response = self.client.post(url="/search/run", json=body)
         if create_response.status_code != 200:
             raise Exception(f"Failed to create search job: {create_response.text}")
         resp_body = create_response.json()
@@ -52,6 +58,9 @@ class AiSearch(OxyStudioAIClient):
                 get_response = self.client.get(
                     "/search/run/data", params={"run_id": run_id}
                 )
+                if get_response.status_code == 202:
+                    time.sleep(POLL_INTERVAL_SECONDS)
+                    continue
                 if get_response.status_code != 200:
                     raise Exception(f"Failed to search: {get_response.text}")
                 resp_body = get_response.json()
@@ -89,7 +98,7 @@ class AiSearch(OxyStudioAIClient):
             "return_content": return_content,
         }
         async with self.async_client() as client:
-            create_response = await client.post(url="/search", json=body)
+            create_response = await client.post(url="/search/run", json=body)
             if create_response.status_code != 200:
                 raise Exception(f"Failed to create search job: {create_response.text}")
             resp_body = create_response.json()
@@ -99,6 +108,9 @@ class AiSearch(OxyStudioAIClient):
                     get_response = await client.get(
                         "/search/run/data", params={"run_id": run_id}
                     )
+                    if get_response.status_code == 202:
+                        await asyncio.sleep(POLL_INTERVAL_SECONDS)
+                        continue
                     if get_response.status_code != 200:
                         raise Exception(f"Failed to search: {get_response.text}")
                     resp_body = get_response.json()
