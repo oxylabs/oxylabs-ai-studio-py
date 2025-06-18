@@ -96,7 +96,7 @@ class BrowserAgent(OxyStudioAIClient):
         output_format: Literal["json", "markdown", "html", "screenshot"] = "markdown",
         schema: dict[str, Any] | None = None,
     ) -> BrowserAgentJob:
-        """Async version of run. Uses httpx.AsyncClient for non-blocking polling."""
+        """Async version of run."""
         if output_format == "json" and schema is None:
             raise ValueError("openapi_schema is required when output_format is json")
 

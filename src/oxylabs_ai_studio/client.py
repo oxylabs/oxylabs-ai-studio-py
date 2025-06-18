@@ -1,10 +1,11 @@
-import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 import httpx
 
-logger = logging.getLogger(__file__)
+from oxylabs_ai_studio.logger import get_logger
+
+logger = get_logger(__file__)
 
 API_URL = "https://api-aistudio.oxylabs.io/v1"
 

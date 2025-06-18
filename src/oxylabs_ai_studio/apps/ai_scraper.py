@@ -95,7 +95,7 @@ class AiScraper(OxyStudioAIClient):
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
     ) -> AiScraperJob:
-        """Async version of scrape. Uses httpx.AsyncClient for non-blocking polling."""
+        """Async version of scrape."""
         if output_format == "json" and schema is None:
             raise ValueError("openapi_schema is required when output_format is json")
 

@@ -102,7 +102,7 @@ class AiCrawl(OxyStudioAIClient):
         render_javascript: bool = False,
         return_sources_limit: int = 25,
     ) -> AiCrawlJob:
-        """Async version of crawl. Uses httpx.AsyncClient for non-blocking polling."""
+        """Async version of crawl."""
         if output_format == "json" and schema is None:
             raise ValueError("openapi_schema is required when output_format is json")
 
