@@ -4,21 +4,26 @@ from contextlib import asynccontextmanager
 import httpx
 
 from oxylabs_ai_studio.logger import get_logger
+from oxylabs_ai_studio.settings import settings
 
 logger = get_logger(__file__)
-
-API_URL = "https://api-aistudio.oxylabs.io/v1"
 
 
 class OxyStudioAIClient:
     """Main client for interacting with the Oxy Studio AI API."""
 
     def __init__(self, api_key: str, timeout: float = 30.0):
+        """Initialize the client.
+
+        Args:
+            api_key: The API key for the Oxy Studio AI API.
+            timeout: The timeout for the HTTP client.
+        """
         if not api_key:
             raise ValueError("API key is required")
 
         self.api_key = api_key
-        self.base_url = API_URL
+        self.base_url = settings.OXYLABS_AI_STUDIO_API_URL
         self.timeout = timeout
         # Initialize HTTP client with proper headers
         self.client = httpx.Client(

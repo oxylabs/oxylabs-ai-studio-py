@@ -1,6 +1,6 @@
 [project]
 name = "oxylabs-ai-studio"
-version = "0.2.2"
+version = "0.2.3"
 description = "Oxylabs studio python sdk"
 readme = "README.md"
 keywords = ["oxylabs", "ai", "studio"]
@@ -8,6 +8,7 @@ requires-python = ">=3.10"
 dependencies = [
     "httpx>=0.28.1",
     "pydantic>=2.0.0",
+    "pydantic-settings>=2.9.1",
     "python-dotenv>=1.1.0",
 ]
 
