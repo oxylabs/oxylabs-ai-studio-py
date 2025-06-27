@@ -18,7 +18,7 @@ pip install oxylabs-ai-studio
 
 ```python
 
-from oxylabs_ai_studio.apps.ai_crawl import AiCrawler
+from oxylabs_ai_studio.apps.ai_crawler import AiCrawler
 
 crawler = AiCrawler(api_key="<API_KEY>")
 
