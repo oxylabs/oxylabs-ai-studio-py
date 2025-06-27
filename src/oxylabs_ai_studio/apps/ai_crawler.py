@@ -15,16 +15,16 @@ POLL_MAX_ATTEMPTS = CRAWLER_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 logger = get_logger(__file__)
 
 
-class AiCrawlJob(BaseModel):
+class AiCrawlerJob(BaseModel):
     run_id: str
     message: str | None = None
     data: list[dict[str, Any]] | list[str] | None = None
 
 
-class AiCrawl(OxyStudioAIClient):
+class AiCrawler(OxyStudioAIClient):
     """AI Crawl app."""
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str | None = None):
         super().__init__(api_key=api_key)
 
     def crawl(
@@ -35,7 +35,7 @@ class AiCrawl(OxyStudioAIClient):
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
         return_sources_limit: int = 25,
-    ) -> AiCrawlJob:
+    ) -> AiCrawlerJob:
         if output_format == "json" and schema is None:
             raise ValueError("openapi_schema is required when output_format is json")
 
@@ -71,7 +71,7 @@ class AiCrawl(OxyStudioAIClient):
                     time.sleep(POLL_INTERVAL_SECONDS)
                     continue
                 if resp_body["status"] == "completed":
-                    return AiCrawlJob(
+                    return AiCrawlerJob(
                         run_id=run_id,
                         message=resp_body.get("message", None),
                         data=resp_body["data"],
@@ -101,7 +101,7 @@ class AiCrawl(OxyStudioAIClient):
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
         return_sources_limit: int = 25,
-    ) -> AiCrawlJob:
+    ) -> AiCrawlerJob:
         """Async version of crawl."""
         if output_format == "json" and schema is None:
             raise ValueError("openapi_schema is required when output_format is json")
@@ -139,7 +139,7 @@ class AiCrawl(OxyStudioAIClient):
                         await asyncio.sleep(POLL_INTERVAL_SECONDS)
                         continue
                     if resp_body["status"] == "completed":
-                        return AiCrawlJob(
+                        return AiCrawlerJob(
                             run_id=run_id,
                             message=resp_body.get("message", None),
                             data=resp_body["data"],

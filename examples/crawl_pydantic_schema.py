@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
-from oxylabs_ai_studio.apps.ai_crawl import AiCrawl
+from oxylabs_ai_studio.apps.ai_crawler import AiCrawler
 
 
-crawler = AiCrawl(api_key="<API_KEY>")
+crawler = AiCrawler(api_key="<API_KEY>")
 
 class ProxyPlan(BaseModel):
     name: str = Field(description="The name of the proxy plan")

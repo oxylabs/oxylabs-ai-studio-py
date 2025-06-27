@@ -14,13 +14,13 @@ pip install oxylabs-ai-studio
 
 ## Usage
 
-### Crawl (`AiCrawl.crawl`)
+### Crawl (`AiCrawler.crawl`)
 
 ```python
 
-from oxylabs_ai_studio.apps.ai_crawl import AiCrawl
+from oxylabs_ai_studio.apps.ai_crawl import AiCrawler
 
-crawler = AiCrawl(api_key="<API_KEY>")
+crawler = AiCrawler(api_key="<API_KEY>")
 
 url = "https://oxylabs.io"
 result = crawler.crawl(
