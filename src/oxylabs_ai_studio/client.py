@@ -6,7 +6,7 @@ import httpx
 from oxylabs_ai_studio.logger import get_logger
 from oxylabs_ai_studio.settings import settings
 
-logger = get_logger(__file__)
+logger = get_logger(__name__)
 
 
 class OxyStudioAIClient:

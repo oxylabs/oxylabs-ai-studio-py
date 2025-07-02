@@ -12,7 +12,7 @@ BROWSER_AGENT_TIMEOUT_SECONDS = 60 * 10
 POLL_INTERVAL_SECONDS = 3
 POLL_MAX_ATTEMPTS = BROWSER_AGENT_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
-logger = get_logger(__file__)
+logger = get_logger(__name__)
 
 
 class DataModel(BaseModel):

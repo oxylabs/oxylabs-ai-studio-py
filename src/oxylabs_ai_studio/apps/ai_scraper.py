@@ -13,7 +13,7 @@ SCRAPE_TIMEOUT_SECONDS = 60 * 3
 POLL_INTERVAL_SECONDS = 3
 POLL_MAX_ATTEMPTS = SCRAPE_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
-logger = get_logger(__file__)
+logger = get_logger(__name__)
 
 
 class AiScraperJob(BaseModel):

@@ -10,7 +10,7 @@ SEARCH_TIMEOUT_SECONDS = 60 * 3
 POLL_INTERVAL_SECONDS = 2
 POLL_MAX_ATTEMPTS = SEARCH_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
-logger = get_logger(__file__)
+logger = get_logger(__name__)
 
 
 class SearchResult(BaseModel):

@@ -18,7 +18,11 @@ def get_logger(name: str | None = None) -> logging.Logger:
     else:
         logger_name = name
 
-    return logging.getLogger(logger_name)
+    logger = logging.getLogger(logger_name)
+    if logger_name != LOGGER_NAME:
+        logger.handlers.clear()
+        logger.propagate = True
+    return logger
 
 
 def configure_logging(
