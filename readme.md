@@ -44,7 +44,7 @@ for item in result.data:
 - `schema` (dict | None): OpenAPI schema for structured extraction (required if output_format is "json")
 - `render_javascript` (bool): Render JavaScript (default: False)
 - `return_sources_limit` (int): Max number of sources to return (default: 25)
-- `geo_location` (str): proxy location.
+- `geo_location` (str): proxy location in ISO2 format.
 
 ### Scrape (`AiScraper.scrape`)
 
@@ -71,7 +71,7 @@ print(result)
 - `output_format` (Literal["json", "markdown"]): Output format (default: "markdown")
 - `schema` (dict | None): OpenAPI schema for structured extraction (required if output_format is "json")
 - `render_javascript` (bool): Render JavaScript (default: False)
-- `geo_location` (str): proxy location.
+- `geo_location` (str): proxy location in ISO2 format.
 
 ### Browser Agent (`BrowserAgent.run`)
 
@@ -101,7 +101,7 @@ print(result.data)
 - `user_prompt` (str): Natural language prompt for extraction (**required**)
 - `output_format` (Literal["json", "markdown", "html", "screenshot"]): Output format (default: "markdown")
 - `schema` (dict | None): OpenAPI schema for structured extraction (required if output_format is "json")
-- `geo_location` (str): proxy location.
+- `geo_location` (str): proxy location in ISO2 format.
 
 ### Search (`AiSearch.search`)
 
@@ -126,7 +126,7 @@ print(result.data)
 - `limit` (int): Maximum number of results to return (default: 10, maximum: 50)
 - `render_javascript` (bool): Render JavaScript (default: False)
 - `return_content` (bool): Whether to return markdown contents in results (default: True)
-- `geo_location` (str): search proxy location.
+- `geo_location` (str): search proxy location in ISO2 format.
 
 ---
 See the [examples](https://github.com/oxylabs/oxylabs-ai-studio-py/tree/main/examples) folder for usage examples of each method. Each method has corresponding async version.
