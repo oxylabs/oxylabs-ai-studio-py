@@ -36,6 +36,7 @@ class BrowserAgent(OxyStudioAIClient):
         user_prompt: str = "",
         output_format: Literal["json", "markdown", "html", "screenshot"] = "markdown",
         schema: dict[str, Any] | None = None,
+        geo_location: str | None = None,
     ) -> BrowserAgentJob:
         if output_format == "json" and schema is None:
             raise ValueError("openapi_schema is required when output_format is json")
@@ -45,6 +46,7 @@ class BrowserAgent(OxyStudioAIClient):
             "output_format": output_format,
             "openapi_schema": schema,
             "auxiliary_prompt": user_prompt,
+            "geo_location": geo_location,
         }
         create_response = self.client.post(url="/browser-agent/run", json=body)
         if create_response.status_code != 200:

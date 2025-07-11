@@ -35,6 +35,7 @@ class AiCrawler(OxyStudioAIClient):
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
         return_sources_limit: int = 25,
+        geo_location: str | None = None,
     ) -> AiCrawlerJob:
         if output_format == "json" and schema is None:
             raise ValueError("openapi_schema is required when output_format is json")
@@ -47,6 +48,7 @@ class AiCrawler(OxyStudioAIClient):
             "auxiliary_prompt": user_prompt,
             "render_html": render_javascript,
             "return_sources_limit": return_sources_limit,
+            "geo_location": geo_location,
         }
         create_response = self.client.post(url="/extract/run", json=body)
         if create_response.status_code != 200:

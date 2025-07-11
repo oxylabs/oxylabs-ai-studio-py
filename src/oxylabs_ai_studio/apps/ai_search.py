@@ -38,6 +38,7 @@ class AiSearch(OxyStudioAIClient):
         limit: int = 10,
         render_javascript: bool = False,
         return_content: bool = True,
+        geo_location: str | None = None,
     ) -> AiSearchJob:
         if not query:
             raise ValueError("query is required")
@@ -47,6 +48,7 @@ class AiSearch(OxyStudioAIClient):
             "limit": limit,
             "render_html": render_javascript,
             "return_content": return_content,
+            "geo_location": geo_location,
         }
         create_response = self.client.post(url="/search/run", json=body)
         if create_response.status_code != 200:
