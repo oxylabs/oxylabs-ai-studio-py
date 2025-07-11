@@ -34,6 +34,7 @@ class AiScraper(OxyStudioAIClient):
         output_format: Literal["json", "markdown"] = "markdown",
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
+        geo_location: str | None = None,
     ) -> AiScraperJob:
         if output_format == "json" and schema is None:
             raise ValueError("openapi_schema is required when output_format is json")
@@ -43,6 +44,7 @@ class AiScraper(OxyStudioAIClient):
             "output_format": output_format,
             "openapi_schema": schema,
             "render_html": render_javascript,
+            "geo_location": geo_location,
         }
         create_response = self.client.post(url="/scrape", json=body)
         if create_response.status_code != 200:
