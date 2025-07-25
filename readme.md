@@ -2,7 +2,7 @@
 
 [![AI-Studio Python (1)](https://raw.githubusercontent.com/oxylabs/oxylabs-ai-studio-js/refs/heads/main/images/banner1.png)](https://aistudio.oxylabs.io/?utm_source=877&utm_medium=affiliate&groupid=877&utm_content=ai-studio-py-github&transaction_id=102f49063ab94276ae8f116d224b67) 
 
-A simple Python SDK for seamlessly interacting with [Oxylabs AI Studio API](https://aistudio.oxylabs.io/apps) services, including AI-Scraper, AI-Crawler, AI-Browser-Agent and other data extraction tools.
+A simple Python SDK for seamlessly interacting with [Oxylabs AI Studio API](https://aistudio.oxylabs.io/) services, including AI-Scraper, AI-Crawler, AI-Browser-Agent and other data extraction tools.
 
 ## Requirements
 - python 3.10 and above
