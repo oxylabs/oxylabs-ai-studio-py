@@ -130,5 +130,29 @@ print(result.data)
 - `return_content` (bool): Whether to return markdown contents in results (default: True)
 - `geo_location` (str): search proxy location in ISO2 format.
 
+### Map (`AiMap.map`)
+```python
+from oxylabs_ai_studio.apps.ai_map import AiMap
+
+
+map = AiMap(api_key="<API_KEY>")
+payload = {
+    "url": "https://career.oxylabs.io",
+    "user_prompt": "job ad pages",
+    "return_sources_limit": 10,
+    "max_depth": 1,
+    "geo_location": None,
+    "render_javascript": False,
+}
+result = map.map(**payload)
+print(result.data)
+```
+**Parameters:**
+- `url` (str): Starting URL to crawl (**required**)
+- `user_prompt` (str): Natural language prompt to guide extraction (**required**)
+- `render_javascript` (bool): Render JavaScript (default: False)
+- `return_sources_limit` (int): Max number of sources to return (default: 25)
+- `geo_location` (str): proxy location in ISO2 format.
+
 ---
 See the [examples](https://github.com/oxylabs/oxylabs-ai-studio-py/tree/main/examples) folder for usage examples of each method. Each method has corresponding async version.
