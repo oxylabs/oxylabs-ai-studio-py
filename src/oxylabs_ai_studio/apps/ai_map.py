@@ -8,8 +8,9 @@ from pydantic import BaseModel
 from oxylabs_ai_studio.client import OxyStudioAIClient
 from oxylabs_ai_studio.logger import get_logger
 
-POLL_MAX_ATTEMPTS = 10
+MAP_TIMEOUT_SECONDS = 60 * 5
 POLL_INTERVAL_SECONDS = 3
+POLL_MAX_ATTEMPTS = MAP_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
 logger = get_logger(__name__)
 
@@ -17,7 +18,7 @@ logger = get_logger(__name__)
 class AiMapJob(BaseModel):
     run_id: str
     message: str | None = None
-    data: dict[str, Any] | str | None
+    data: dict[str, Any] | list[str] | None
 
 
 class AiMap(OxyStudioAIClient):
@@ -31,7 +32,6 @@ class AiMap(OxyStudioAIClient):
         url: str,
         user_prompt: str,
         return_sources_limit: int = 25,
-        max_depth: int = 3,
         geo_location: str | None = None,
         render_javascript: bool = False,
     ) -> AiMapJob:
@@ -39,7 +39,6 @@ class AiMap(OxyStudioAIClient):
             "url": url,
             "user_prompt": user_prompt,
             "return_sources_limit": return_sources_limit,
-            "max_depth": max_depth,
             "geo_location": geo_location,
             "render_html": render_javascript,
         }
@@ -83,7 +82,6 @@ class AiMap(OxyStudioAIClient):
         url: str,
         user_prompt: str,
         return_sources_limit: int = 25,
-        max_depth: int = 3,
         geo_location: str | None = None,
         render_javascript: bool = False,
     ) -> AiMapJob:
@@ -91,7 +89,6 @@ class AiMap(OxyStudioAIClient):
             "url": url,
             "user_prompt": user_prompt,
             "return_sources_limit": return_sources_limit,
-            "max_depth": max_depth,
             "geo_location": geo_location,
             "render_html": render_javascript,
         }
