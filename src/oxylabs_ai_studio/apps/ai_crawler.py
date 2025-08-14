@@ -103,6 +103,7 @@ class AiCrawler(OxyStudioAIClient):
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
         return_sources_limit: int = 25,
+        geo_location: str | None = None,
     ) -> AiCrawlerJob:
         """Async version of crawl."""
         if output_format == "json" and schema is None:
@@ -116,6 +117,7 @@ class AiCrawler(OxyStudioAIClient):
             "auxiliary_prompt": user_prompt,
             "render_html": render_javascript,
             "return_sources_limit": return_sources_limit,
+            "geo_location": geo_location,
         }
         async with self.async_client() as client:
             create_response = await client.post(url="/extract/run", json=body)

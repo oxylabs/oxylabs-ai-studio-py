@@ -96,6 +96,7 @@ class AiScraper(OxyStudioAIClient):
         output_format: Literal["json", "markdown"] = "markdown",
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
+        geo_location: str | None = None,
     ) -> AiScraperJob:
         """Async version of scrape."""
         if output_format == "json" and schema is None:
@@ -106,6 +107,7 @@ class AiScraper(OxyStudioAIClient):
             "output_format": output_format,
             "openapi_schema": schema,
             "render_html": render_javascript,
+            "geo_location": geo_location,
         }
         async with self.async_client() as client:
             create_response = await client.post(url="/scrape", json=body)

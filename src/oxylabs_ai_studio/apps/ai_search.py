@@ -88,6 +88,7 @@ class AiSearch(OxyStudioAIClient):
         limit: int = 10,
         render_javascript: bool = False,
         return_content: bool = True,
+        geo_location: str | None = None,
     ) -> AiSearchJob:
         """Async version of search."""
         if not query:
@@ -98,6 +99,7 @@ class AiSearch(OxyStudioAIClient):
             "limit": limit,
             "render_html": render_javascript,
             "return_content": return_content,
+            "geo_location": geo_location,
         }
         async with self.async_client() as client:
             create_response = await client.post(url="/search/run", json=body)

@@ -97,6 +97,7 @@ class BrowserAgent(OxyStudioAIClient):
         user_prompt: str = "",
         output_format: Literal["json", "markdown", "html", "screenshot"] = "markdown",
         schema: dict[str, Any] | None = None,
+        geo_location: str | None = None,
     ) -> BrowserAgentJob:
         """Async version of run."""
         if output_format == "json" and schema is None:
@@ -107,6 +108,7 @@ class BrowserAgent(OxyStudioAIClient):
             "output_format": output_format,
             "openapi_schema": schema,
             "auxiliary_prompt": user_prompt,
+            "geo_location": geo_location,
         }
         async with self.async_client() as client:
             create_response = await client.post(url="/browser-agent/run", json=body)
