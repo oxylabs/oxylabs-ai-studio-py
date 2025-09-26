@@ -24,7 +24,7 @@ class AiMapJob(BaseModel):
 class AiMap(OxyStudioAIClient):
     """AI Map app."""
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str | None = None):
         super().__init__(api_key=api_key)
 
     def map(
@@ -42,7 +42,8 @@ class AiMap(OxyStudioAIClient):
             "geo_location": geo_location,
             "render_html": render_javascript,
         }
-        create_response = self.client.post(url="/map", json=body)
+        client = self.get_client()
+        create_response = client.post(url="/map", json=body)
         if create_response.status_code != 200:
             raise Exception(
                 f"Failed to create map job for {url}: {create_response.text}"
@@ -51,7 +52,7 @@ class AiMap(OxyStudioAIClient):
         run_id = resp_body["run_id"]
         try:
             for _ in range(POLL_MAX_ATTEMPTS):
-                get_response = self.client.get("/map/run", params={"run_id": run_id})
+                get_response = client.get("/map/run", params={"run_id": run_id})
                 if get_response.status_code != 200:
                     raise Exception(f"Failed to map {url}: {get_response.text}")
                 resp_body = get_response.json()
@@ -59,7 +60,7 @@ class AiMap(OxyStudioAIClient):
                     return AiMapJob(
                         run_id=run_id,
                         message=resp_body.get("message", None),
-                        data=self._get_data(run_id=run_id),
+                        data=self._get_data(client=client, run_id=run_id),
                     )
                 if resp_body["status"] == "failed":
                     raise Exception(f"Failed to map {url}.")
@@ -71,8 +72,8 @@ class AiMap(OxyStudioAIClient):
             raise e
         raise TimeoutError(f"Failed to map {url}: timeout.")
 
-    def _get_data(self, run_id: str) -> dict[str, Any]:
-        get_response = self.client.get("/map/run/data", params={"run_id": run_id})
+    def _get_data(self, client: httpx.Client, run_id: str) -> dict[str, Any]:
+        get_response = client.get("/map/run/data", params={"run_id": run_id})
         if get_response.status_code != 200:
             raise Exception(f"Failed to get data for run {run_id}: {get_response.text}")
         return get_response.json().get("data", {}) or {}

@@ -27,7 +27,7 @@ class BrowserAgentJob(BaseModel):
 
 
 class BrowserAgent(OxyStudioAIClient):
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str | None = None):
         super().__init__(api_key=api_key)
 
     def run(
@@ -48,7 +48,8 @@ class BrowserAgent(OxyStudioAIClient):
             "auxiliary_prompt": user_prompt,
             "geo_location": geo_location,
         }
-        create_response = self.client.post(url="/browser-agent/run", json=body)
+        client = self.get_client()
+        create_response = client.post(url="/browser-agent/run", json=body)
         if create_response.status_code != 200:
             raise Exception(f"Failed to launch browser agent: {create_response.text}")
         resp_body = create_response.json()
@@ -56,7 +57,7 @@ class BrowserAgent(OxyStudioAIClient):
         logger.info(f"Starting browser agent run for url: {url}. Job id: {run_id}.")
         try:
             for _ in range(POLL_MAX_ATTEMPTS):
-                get_response = self.client.get(
+                get_response = client.get(
                     "/browser-agent/run/data", params={"run_id": run_id}
                 )
                 if get_response.status_code == 202:
@@ -85,7 +86,9 @@ class BrowserAgent(OxyStudioAIClient):
     def generate_schema(self, prompt: str) -> dict[str, Any] | None:
         logger.info("Generating schema")
         body = {"user_prompt": prompt}
-        response = self.client.post(url="/browser-agent/generate-params", json=body)
+        response = self.get_client().post(
+            url="/browser-agent/generate-params", json=body
+        )
         if response.status_code != 200:
             raise Exception(f"Failed to generate schema: {response.text}")
         json_response: SchemaResponse = response.json()

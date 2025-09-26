@@ -29,7 +29,7 @@ class AiSearchJob(BaseModel):
 class AiSearch(OxyStudioAIClient):
     """AI Search app."""
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str | None = None):
         super().__init__(api_key=api_key)
 
     def search(
@@ -50,16 +50,15 @@ class AiSearch(OxyStudioAIClient):
             "return_content": return_content,
             "geo_location": geo_location,
         }
-        create_response = self.client.post(url="/search/run", json=body)
+        client = self.get_client()
+        create_response = client.post(url="/search/run", json=body)
         if create_response.status_code != 200:
             raise Exception(f"Failed to create search job: {create_response.text}")
         resp_body = create_response.json()
         run_id = resp_body["run_id"]
         try:
             for _ in range(POLL_MAX_ATTEMPTS):
-                get_response = self.client.get(
-                    "/search/run/data", params={"run_id": run_id}
-                )
+                get_response = client.get("/search/run/data", params={"run_id": run_id})
                 if get_response.status_code == 202:
                     time.sleep(POLL_INTERVAL_SECONDS)
                     continue

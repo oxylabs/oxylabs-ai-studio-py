@@ -50,7 +50,8 @@ class AiCrawler(OxyStudioAIClient):
             "return_sources_limit": return_sources_limit,
             "geo_location": geo_location,
         }
-        create_response = self.client.post(url="/extract/run", json=body)
+        client = self.get_client()
+        create_response = client.post(url="/extract/run", json=body)
         if create_response.status_code != 200:
             raise Exception(
                 f"Failed to create crawl job for {url}: {create_response.text}"
@@ -60,7 +61,7 @@ class AiCrawler(OxyStudioAIClient):
         logger.info(f"Starting crawl for url: {url}. Job id: {run_id}.")
         try:
             for _ in range(POLL_MAX_ATTEMPTS):
-                get_response = self.client.get(
+                get_response = client.get(
                     "/extract/run/data", params={"run_id": run_id}
                 )
                 if get_response.status_code == 202:
@@ -89,7 +90,7 @@ class AiCrawler(OxyStudioAIClient):
     def generate_schema(self, prompt: str) -> dict[str, Any] | None:
         logger.info("Generating schema")
         body = {"user_prompt": prompt}
-        response = self.client.post(url="/extract/generate-params", json=body)
+        response = self.get_client().post(url="/extract/generate-params", json=body)
         if response.status_code != 200:
             raise Exception(f"Failed to generate schema: {response.text}")
         json_response: SchemaResponse = response.json()

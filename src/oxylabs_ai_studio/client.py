@@ -8,6 +8,14 @@ from oxylabs_ai_studio.settings import settings
 
 logger = get_logger(__name__)
 
+_UA_API: str | None = None
+
+
+def _resolve_ua() -> str:
+    return (
+        _UA_API.strip() if isinstance(_UA_API, str) and _UA_API.strip() else None
+    ) or "python-sdk"
+
 
 class OxyStudioAIClient:
     """Main client for interacting with the Oxy Studio AI API."""
@@ -25,15 +33,16 @@ class OxyStudioAIClient:
         self.api_key = resolved_key
         self.base_url = settings.OXYLABS_AI_STUDIO_API_URL
         self.timeout = timeout
-        # Initialize HTTP client with proper headers
-        self.client = httpx.Client(
+
+    def get_client(self) -> httpx.Client:
+        return httpx.Client(
             base_url=self.base_url,
             headers={
                 "x-api-key": self.api_key,
                 "Content-Type": "application/json",
-                "User-Agent": "python-sdk",
+                "User-Agent": _resolve_ua(),
             },
-            timeout=timeout,
+            timeout=self.timeout,
         )
 
     @asynccontextmanager
@@ -44,7 +53,7 @@ class OxyStudioAIClient:
             headers={
                 "x-api-key": self.api_key,
                 "Content-Type": "application/json",
-                "User-Agent": "python-sdk",
+                "User-Agent": _resolve_ua(),
             },
             timeout=self.timeout,
         )
