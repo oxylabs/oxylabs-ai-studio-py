@@ -9,7 +9,7 @@ from oxylabs_ai_studio.client import OxyStudioAIClient
 from oxylabs_ai_studio.logger import get_logger
 
 MAP_TIMEOUT_SECONDS = 60 * 5
-POLL_INTERVAL_SECONDS = 3
+POLL_INTERVAL_SECONDS = 5
 POLL_MAX_ATTEMPTS = MAP_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
 logger = get_logger(__name__)
@@ -43,7 +43,9 @@ class AiMap(OxyStudioAIClient):
             "render_html": render_javascript,
         }
         client = self.get_client()
-        create_response = client.post(url="/map", json=body)
+        create_response = self.call_api(
+            client=client, url="/map", method="POST", body=body
+        )
         if create_response.status_code != 200:
             raise Exception(
                 f"Failed to create map job for {url}: {create_response.text}"
@@ -52,7 +54,12 @@ class AiMap(OxyStudioAIClient):
         run_id = resp_body["run_id"]
         try:
             for _ in range(POLL_MAX_ATTEMPTS):
-                get_response = client.get("/map/run", params={"run_id": run_id})
+                get_response = self.call_api(
+                    client=client,
+                    url="/map/run",
+                    method="GET",
+                    params={"run_id": run_id},
+                )
                 if get_response.status_code != 200:
                     raise Exception(f"Failed to map {url}: {get_response.text}")
                 resp_body = get_response.json()
@@ -73,7 +80,9 @@ class AiMap(OxyStudioAIClient):
         raise TimeoutError(f"Failed to map {url}: timeout.")
 
     def _get_data(self, client: httpx.Client, run_id: str) -> dict[str, Any]:
-        get_response = client.get("/map/run/data", params={"run_id": run_id})
+        get_response = self.call_api(
+            client=client, url="/map/run/data", method="GET", params={"run_id": run_id}
+        )
         if get_response.status_code != 200:
             raise Exception(f"Failed to get data for run {run_id}: {get_response.text}")
         return get_response.json().get("data", {}) or {}
@@ -94,7 +103,9 @@ class AiMap(OxyStudioAIClient):
             "render_html": render_javascript,
         }
         async with self.async_client() as client:
-            create_response = await client.post(url="/map", json=body)
+            create_response = await self.call_api_async(
+                client=client, url="/map", method="POST", body=body
+            )
             if create_response.status_code != 200:
                 raise Exception(
                     f"Failed to create map job for {url}: {create_response.text}"
@@ -103,8 +114,11 @@ class AiMap(OxyStudioAIClient):
             run_id = resp_body["run_id"]
             try:
                 for _ in range(POLL_MAX_ATTEMPTS):
-                    get_response = await client.get(
-                        "/map/run", params={"run_id": run_id}
+                    get_response = await self.call_api_async(
+                        client=client,
+                        url="/map/run",
+                        method="GET",
+                        params={"run_id": run_id},
                     )
                     if get_response.status_code != 200:
                         raise Exception(f"Failed to map {url}: {get_response.text}")
@@ -129,7 +143,9 @@ class AiMap(OxyStudioAIClient):
     async def get_data_async(
         self, client: httpx.AsyncClient, run_id: str
     ) -> dict[str, Any]:
-        get_response = await client.get("/map/run/data", params={"run_id": run_id})
+        get_response = await self.call_api_async(
+            client=client, url="/map/run/data", method="GET", params={"run_id": run_id}
+        )
         if get_response.status_code != 200:
             raise Exception(f"Failed to get data for run {run_id}: {get_response.text}")
         return get_response.json().get("data", {}) or {}
