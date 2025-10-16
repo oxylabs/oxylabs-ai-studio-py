@@ -9,7 +9,7 @@ from oxylabs_ai_studio.logger import get_logger
 from oxylabs_ai_studio.models import SchemaResponse
 
 BROWSER_AGENT_TIMEOUT_SECONDS = 60 * 10
-POLL_INTERVAL_SECONDS = 3
+POLL_INTERVAL_SECONDS = 5
 POLL_MAX_ATTEMPTS = BROWSER_AGENT_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
 logger = get_logger(__name__)
@@ -49,7 +49,9 @@ class BrowserAgent(OxyStudioAIClient):
             "geo_location": geo_location,
         }
         client = self.get_client()
-        create_response = client.post(url="/browser-agent/run", json=body)
+        create_response = self.call_api(
+            client=client, url="/browser-agent/run", method="POST", body=body
+        )
         if create_response.status_code != 200:
             raise Exception(f"Failed to launch browser agent: {create_response.text}")
         resp_body = create_response.json()
@@ -57,14 +59,22 @@ class BrowserAgent(OxyStudioAIClient):
         logger.info(f"Starting browser agent run for url: {url}. Job id: {run_id}.")
         try:
             for _ in range(POLL_MAX_ATTEMPTS):
-                get_response = client.get(
-                    "/browser-agent/run/data", params={"run_id": run_id}
-                )
+                try:
+                    get_response = self.call_api(
+                        client=client,
+                        url="/browser-agent/run/data",
+                        method="GET",
+                        params={"run_id": run_id},
+                    )
+                except Exception:
+                    time.sleep(POLL_INTERVAL_SECONDS)
+                    continue
                 if get_response.status_code == 202:
                     time.sleep(POLL_INTERVAL_SECONDS)
                     continue
                 if get_response.status_code != 200:
-                    raise Exception(f"Failed to scrape {url}: {get_response.text}")
+                    time.sleep(POLL_INTERVAL_SECONDS)
+                    continue
                 resp_body = get_response.json()
                 if resp_body["status"] == "processing":
                     time.sleep(POLL_INTERVAL_SECONDS)
@@ -76,7 +86,11 @@ class BrowserAgent(OxyStudioAIClient):
                         data=resp_body["data"],
                     )
                 if resp_body["status"] == "failed":
-                    raise Exception(f"Failed to scrape {url}.")
+                    return BrowserAgentJob(
+                        run_id=run_id,
+                        message=resp_body.get("error_code", None),
+                        data=None,
+                    )
                 time.sleep(POLL_INTERVAL_SECONDS)
         except KeyboardInterrupt:
             logger.info("[Cancelled] Browser agent was cancelled by user.")
@@ -86,8 +100,11 @@ class BrowserAgent(OxyStudioAIClient):
     def generate_schema(self, prompt: str) -> dict[str, Any] | None:
         logger.info("Generating schema")
         body = {"user_prompt": prompt}
-        response = self.get_client().post(
-            url="/browser-agent/generate-params", json=body
+        response = self.call_api(
+            client=self.get_client(),
+            url="/browser-agent/generate-params",
+            method="POST",
+            body=body,
         )
         if response.status_code != 200:
             raise Exception(f"Failed to generate schema: {response.text}")
@@ -114,7 +131,9 @@ class BrowserAgent(OxyStudioAIClient):
             "geo_location": geo_location,
         }
         async with self.async_client() as client:
-            create_response = await client.post(url="/browser-agent/run", json=body)
+            create_response = await self.call_api_async(
+                client=client, url="/browser-agent/run", method="POST", body=body
+            )
             if create_response.status_code != 200:
                 raise Exception(
                     f"Failed to launch browser agent: {create_response.text}"
@@ -126,14 +145,22 @@ class BrowserAgent(OxyStudioAIClient):
             )
             try:
                 for _ in range(POLL_MAX_ATTEMPTS):
-                    get_response = await client.get(
-                        "/browser-agent/run/data", params={"run_id": run_id}
-                    )
+                    try:
+                        get_response = await self.call_api_async(
+                            client=client,
+                            url="/browser-agent/run/data",
+                            method="GET",
+                            params={"run_id": run_id},
+                        )
+                    except Exception:
+                        await asyncio.sleep(POLL_INTERVAL_SECONDS)
+                        continue
                     if get_response.status_code == 202:
                         await asyncio.sleep(POLL_INTERVAL_SECONDS)
                         continue
                     if get_response.status_code != 200:
-                        raise Exception(f"Failed to scrape {url}: {get_response.text}")
+                        await asyncio.sleep(POLL_INTERVAL_SECONDS)
+                        continue
                     resp_body = get_response.json()
                     if resp_body["status"] == "processing":
                         await asyncio.sleep(POLL_INTERVAL_SECONDS)
@@ -145,7 +172,11 @@ class BrowserAgent(OxyStudioAIClient):
                             data=resp_body["data"],
                         )
                     if resp_body["status"] == "failed":
-                        raise Exception(f"Failed to scrape {url}.")
+                        return BrowserAgentJob(
+                            run_id=run_id,
+                            message=resp_body.get("error_code", None),
+                            data=None,
+                        )
                     await asyncio.sleep(POLL_INTERVAL_SECONDS)
             except KeyboardInterrupt:
                 logger.info("[Cancelled] Browser agent was cancelled by user.")
@@ -157,8 +188,11 @@ class BrowserAgent(OxyStudioAIClient):
         logger.info("Generating schema (async)")
         body = {"user_prompt": prompt}
         async with self.async_client() as client:
-            response = await client.post(
-                url="/browser-agent/generate-params", json=body
+            response = await self.call_api_async(
+                client=client,
+                url="/browser-agent/generate-params",
+                method="POST",
+                body=body,
             )
             if response.status_code != 200:
                 raise Exception(f"Failed to generate schema: {response.text}")
