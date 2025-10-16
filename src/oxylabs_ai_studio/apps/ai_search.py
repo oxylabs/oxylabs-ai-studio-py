@@ -7,7 +7,7 @@ from oxylabs_ai_studio.client import OxyStudioAIClient
 from oxylabs_ai_studio.logger import get_logger
 
 SEARCH_TIMEOUT_SECONDS = 60 * 3
-POLL_INTERVAL_SECONDS = 2
+POLL_INTERVAL_SECONDS = 5
 POLL_MAX_ATTEMPTS = SEARCH_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
 logger = get_logger(__name__)
@@ -51,14 +51,22 @@ class AiSearch(OxyStudioAIClient):
             "geo_location": geo_location,
         }
         client = self.get_client()
-        create_response = client.post(url="/search/run", json=body)
-        if create_response.status_code != 200:
-            raise Exception(f"Failed to create search job: {create_response.text}")
+        create_response = self.call_api(
+            client=client, url="/search/run", method="POST", body=body
+        )
+        status_code = create_response.status_code
+        if status_code != 200:
+            raise Exception(f"Failed to create search job: `{create_response.text}`")
         resp_body = create_response.json()
         run_id = resp_body["run_id"]
         try:
             for _ in range(POLL_MAX_ATTEMPTS):
-                get_response = client.get("/search/run/data", params={"run_id": run_id})
+                get_response = self.call_api(
+                    client=client,
+                    url="/search/run/data",
+                    method="GET",
+                    params={"run_id": run_id},
+                )
                 if get_response.status_code == 202:
                     time.sleep(POLL_INTERVAL_SECONDS)
                     continue
@@ -72,7 +80,9 @@ class AiSearch(OxyStudioAIClient):
                         data=resp_body["data"],
                     )
                 if resp_body["status"] == "failed":
-                    raise Exception(f"Failed to search {query=}.")
+                    raise Exception(
+                        f"Failed to search {query=}. job failed run_id={run_id}"
+                    )
                 time.sleep(POLL_INTERVAL_SECONDS)
         except KeyboardInterrupt:
             logger.info("[Cancelled] Request was cancelled by user.")
@@ -101,15 +111,19 @@ class AiSearch(OxyStudioAIClient):
             "geo_location": geo_location,
         }
         async with self.async_client() as client:
-            create_response = await client.post(url="/search/run", json=body)
-            if create_response.status_code != 200:
-                raise Exception(f"Failed to create search job: {create_response.text}")
+            create_response = await self.call_api_async(
+                client=client, url="/search/run", method="POST", body=body
+            )
+
             resp_body = create_response.json()
             run_id = resp_body["run_id"]
             try:
                 for _ in range(POLL_MAX_ATTEMPTS):
-                    get_response = await client.get(
-                        "/search/run/data", params={"run_id": run_id}
+                    get_response = await self.call_api_async(
+                        client=client,
+                        url="/search/run/data",
+                        method="GET",
+                        params={"run_id": run_id},
                     )
                     if get_response.status_code == 202:
                         await asyncio.sleep(POLL_INTERVAL_SECONDS)
@@ -124,6 +138,7 @@ class AiSearch(OxyStudioAIClient):
                             data=resp_body["data"],
                         )
                     if resp_body["status"] == "failed":
+                        logger.error("[search_async] job failed run_id=%s", run_id)
                         raise Exception(f"Failed to search {query=}.")
                     await asyncio.sleep(POLL_INTERVAL_SECONDS)
             except KeyboardInterrupt:
