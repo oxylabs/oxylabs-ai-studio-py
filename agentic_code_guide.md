@@ -78,7 +78,7 @@ Output (result):
 
     ```python
     class DataModel(BaseModel):
-        type: Literal["json", "markdown", "html", "screenshot"]
+        type: Literal["json", "markdown", "html", "screenshot", "csv"]
         content: dict[str, Any] | str | None
 
     class BrowserAgentJob(BaseModel):
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 Parameters:
 
 - url (str): Target URL to scrape (required)
-- output_format (Literal["json", "markdown"]): Output format (default: "markdown")
+- output_format (Literal["json", "markdown", "csv", "screenshot"]): Output format (default: "markdown")
 - schema (dict | None): OpenAPI schema for structured extraction (required if output_format is "json")
 - render_javascript (bool): Render JavaScript (default: False)
 - geo_location (str): proxy location in ISO2 format.
@@ -156,6 +156,8 @@ Output (result):
 
     If output_format is "json", data will be a dictionary.
     If output_format is "markdown", data will be a string.
+    If output_format is "csv", data will be a string formatted in a form of csv.
+    If output_format is "screenshot", data will be a string.
 
 
 ## Use Cases Examples
