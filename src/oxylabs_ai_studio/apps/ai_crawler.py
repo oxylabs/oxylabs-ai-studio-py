@@ -31,14 +31,16 @@ class AiCrawler(OxyStudioAIClient):
         self,
         url: str,
         user_prompt: str,
-        output_format: Literal["json", "markdown"] = "markdown",
+        output_format: Literal["json", "markdown", "csv"] = "markdown",
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
         return_sources_limit: int = 25,
         geo_location: str | None = None,
     ) -> AiCrawlerJob:
-        if output_format == "json" and schema is None:
-            raise ValueError("openapi_schema is required when output_format is json")
+        if output_format in ["json", "csv"] and schema is None:
+            raise ValueError(
+                "openapi_schema is required when output_format is json or csv.",
+            )
 
         body = {
             "domain": url,
@@ -119,15 +121,17 @@ class AiCrawler(OxyStudioAIClient):
         self,
         url: str,
         user_prompt: str = "",
-        output_format: Literal["json", "markdown"] = "markdown",
+        output_format: Literal["json", "markdown", "csv"] = "markdown",
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
         return_sources_limit: int = 25,
         geo_location: str | None = None,
     ) -> AiCrawlerJob:
         """Async version of crawl."""
-        if output_format == "json" and schema is None:
-            raise ValueError("openapi_schema is required when output_format is json")
+        if output_format in ["json", "csv"] and schema is None:
+            raise ValueError(
+                "openapi_schema is required when output_format is json or csv.",
+            )
 
         body = {
             "domain": url,
