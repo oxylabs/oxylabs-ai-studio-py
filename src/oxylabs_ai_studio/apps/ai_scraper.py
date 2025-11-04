@@ -31,13 +31,15 @@ class AiScraper(OxyStudioAIClient):
     def scrape(
         self,
         url: str,
-        output_format: Literal["json", "markdown"] = "markdown",
+        output_format: Literal["json", "markdown", "csv", "screenshot"] = "markdown",
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
         geo_location: str | None = None,
     ) -> AiScraperJob:
-        if output_format == "json" and schema is None:
-            raise ValueError("openapi_schema is required when output_format is json")
+        if output_format in ["json", "csv"] and schema is None:
+            raise ValueError(
+                "openapi_schema is required when output_format is json or csv.",
+            )
 
         body = {
             "url": url,
@@ -117,14 +119,16 @@ class AiScraper(OxyStudioAIClient):
     async def scrape_async(
         self,
         url: str,
-        output_format: Literal["json", "markdown"] = "markdown",
+        output_format: Literal["json", "markdown", "csv", "screenshot"] = "markdown",
         schema: dict[str, Any] | None = None,
         render_javascript: bool = False,
         geo_location: str | None = None,
     ) -> AiScraperJob:
         """Async version of scrape."""
-        if output_format == "json" and schema is None:
-            raise ValueError("openapi_schema is required when output_format is json")
+        if output_format in ["json", "csv"] and schema is None:
+            raise ValueError(
+                "openapi_schema is required when output_format is json or csv.",
+            )
 
         body = {
             "url": url,
