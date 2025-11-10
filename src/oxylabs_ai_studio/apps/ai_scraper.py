@@ -33,7 +33,7 @@ class AiScraper(OxyStudioAIClient):
         url: str,
         output_format: Literal["json", "markdown", "csv", "screenshot"] = "markdown",
         schema: dict[str, Any] | None = None,
-        render_javascript: bool = False,
+        render_javascript: bool | Literal["auto"] = False,
         geo_location: str | None = None,
     ) -> AiScraperJob:
         if output_format in ["json", "csv"] and schema is None:
