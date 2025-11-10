@@ -74,7 +74,7 @@ print(result)
 - `url` (str): Target URL to scrape (**required**)
 - `output_format` (Literal["json", "markdown"]): Output format (default: "markdown")
 - `schema` (dict | None): OpenAPI schema for structured extraction (required if output_format is "json")
-- `render_javascript` (bool): Render JavaScript (default: False)
+- `render_javascript` (bool | string): Render JavaScript. Can be set to "auto", meaning that we will decide if it's necessary (default: False)
 - `geo_location` (str): proxy location in ISO2 format.
 
 ### Browser Agent (`BrowserAgent.run`)
