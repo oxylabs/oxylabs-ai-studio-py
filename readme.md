@@ -154,6 +154,10 @@ print(result.data)
 - `render_javascript` (bool): Render JavaScript (default: False)
 - `return_sources_limit` (int): Max number of sources to return (default: 25)
 - `geo_location` (str): proxy location in ISO2 format.
+- `include_sitemap` (bool): Include URLs discovered via sitemap. (default: False)
+- `include_paths` (list[str] | None): Regex patterns to include (matched against URL path, e.g., `.*/?products/.*`)
+- `exclude_paths` (list[str] | None): Regex patterns to exclude (matched against URL path)
+
 
 ---
 See the [examples](https://github.com/oxylabs/oxylabs-ai-studio-py/tree/main/examples) folder for usage examples of each method. Each method has corresponding async version.

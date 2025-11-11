@@ -34,6 +34,9 @@ class AiMap(OxyStudioAIClient):
         return_sources_limit: int = 25,
         geo_location: str | None = None,
         render_javascript: bool = False,
+        include_sitemap: bool = False,
+        include_paths: list[str] | None = None,
+        exclude_paths: list[str] | None = None,
     ) -> AiMapJob:
         body = {
             "url": url,
@@ -41,6 +44,9 @@ class AiMap(OxyStudioAIClient):
             "return_sources_limit": return_sources_limit,
             "geo_location": geo_location,
             "render_html": render_javascript,
+            "include_sitemap": include_sitemap,
+            "include_paths": include_paths,
+            "exclude_paths": exclude_paths,
         }
         client = self.get_client()
         create_response = self.call_api(
@@ -103,6 +109,9 @@ class AiMap(OxyStudioAIClient):
         return_sources_limit: int = 25,
         geo_location: str | None = None,
         render_javascript: bool = False,
+        include_sitemap: bool = False,
+        include_paths: list[str] | None = None,
+        exclude_paths: list[str] | None = None,
     ) -> AiMapJob:
         body = {
             "url": url,
@@ -110,6 +119,9 @@ class AiMap(OxyStudioAIClient):
             "return_sources_limit": return_sources_limit,
             "geo_location": geo_location,
             "render_html": render_javascript,
+            "include_sitemap": include_sitemap,
+            "include_paths": include_paths,
+            "exclude_paths": exclude_paths,
         }
         async with self.async_client() as client:
             create_response = await self.call_api_async(
