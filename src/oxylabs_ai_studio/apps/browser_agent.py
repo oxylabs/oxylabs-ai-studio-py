@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 
 class DataModel(BaseModel):
-    type: Literal["json", "markdown", "html", "screenshot", "csv"]
+    type: Literal["json", "markdown", "html", "screenshot", "csv", "toon"]
     content: dict[str, Any] | str | None
 
 
@@ -35,14 +35,14 @@ class BrowserAgent(OxyStudioAIClient):
         url: str,
         user_prompt: str = "",
         output_format: Literal[
-            "json", "markdown", "html", "screenshot", "csv"
+            "json", "markdown", "html", "screenshot", "csv", "toon"
         ] = "markdown",
         schema: dict[str, Any] | None = None,
         geo_location: str | None = None,
     ) -> BrowserAgentJob:
-        if output_format in ["json", "csv"] and schema is None:
+        if output_format in ["json", "csv", "toon"] and schema is None:
             raise ValueError(
-                "openapi_schema is required when output_format is json or csv.",
+                "openapi_schema is required when output_format is json, csv or toon.",
             )
 
         body = {
@@ -125,14 +125,15 @@ class BrowserAgent(OxyStudioAIClient):
             "html",
             "screenshot",
             "csv",
+            "toon",
         ] = "markdown",
         schema: dict[str, Any] | None = None,
         geo_location: str | None = None,
     ) -> BrowserAgentJob:
         """Async version of run."""
-        if output_format in ["json", "csv"] and schema is None:
+        if output_format in ["json", "csv", "toon"] and schema is None:
             raise ValueError(
-                "openapi_schema is required when output_format is json or csv.",
+                "openapi_schema is required when output_format is json, csv or toon.",
             )
 
         body = {
