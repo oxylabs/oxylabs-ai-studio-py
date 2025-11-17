@@ -132,6 +132,8 @@ print(result.data)
 - `return_content` (bool): Whether to return markdown contents in results (default: True)
 - `geo_location` (str): search proxy location in ISO2 format.
 
+> **Note:** When `limit <= 10` and `return_content=False`, the search automatically uses the instant endpoint (`/search/instant`) which returns results immediately without polling, providing faster response times.
+
 ### Map (`AiMap.map`)
 ```python
 from oxylabs_ai_studio.apps.ai_map import AiMap

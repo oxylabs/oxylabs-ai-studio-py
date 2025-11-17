@@ -50,6 +50,24 @@ class AiSearch(OxyStudioAIClient):
             "return_content": return_content,
             "geo_location": geo_location,
         }
+        # Use instant endpoint if limit <= 10 and return_content is False
+        if limit <= 10 and not return_content:
+            client = self.get_client()
+            response = self.call_api(
+                client=client, url="/search/instant", method="POST", body=body
+            )
+            status_code = response.status_code
+            if status_code != 200:
+                raise Exception(f"Failed to perform instant search: `{response.text}`")
+
+            resp_body = response.json()
+            return AiSearchJob(
+                run_id=resp_body["run_id"],
+                message=resp_body.get("message", None),
+                data=resp_body.get("data", None),
+            )
+
+        # Use regular polling endpoint
         client = self.get_client()
         create_response = self.call_api(
             client=client, url="/search/run", method="POST", body=body
@@ -118,6 +136,25 @@ class AiSearch(OxyStudioAIClient):
             "geo_location": geo_location,
         }
         async with self.async_client() as client:
+            # Use instant endpoint if limit <= 10 and return_content is False
+            if limit <= 10 and not return_content:
+                response = await self.call_api_async(
+                    client=client, url="/search/instant", method="POST", body=body
+                )
+                status_code = response.status_code
+                if status_code != 200:
+                    raise Exception(
+                        f"Failed to perform instant search: `{response.text}`"
+                    )
+
+                resp_body = response.json()
+                return AiSearchJob(
+                    run_id=resp_body["run_id"],
+                    message=resp_body.get("message", None),
+                    data=resp_body.get("data", None),
+                )
+
+            # Use regular polling endpoint
             create_response = await self.call_api_async(
                 client=client, url="/search/run", method="POST", body=body
             )
