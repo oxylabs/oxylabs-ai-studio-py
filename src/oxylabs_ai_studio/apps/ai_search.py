@@ -32,6 +32,34 @@ class AiSearch(OxyStudioAIClient):
     def __init__(self, api_key: str | None = None):
         super().__init__(api_key=api_key)
 
+    def search_instant(
+        self,
+        query: str,
+        geo_location: str | None = None,
+    ) -> AiSearchJob:
+        """Search with instant response (no polling)"""
+        if not query:
+            raise ValueError("query is required")
+
+        body = {
+            "query": query,
+            "geo_location": geo_location,
+        }
+        client = self.get_client()
+        response = self.call_api(
+            client=client, url="/search/instant", method="POST", body=body
+        )
+        status_code = response.status_code
+        if status_code != 200:
+            raise Exception(f"Failed to perform instant search: `{response.text}`")
+
+        resp_body = response.json()
+        return AiSearchJob(
+            run_id=resp_body["run_id"],
+            message=resp_body.get("message", None),
+            data=resp_body.get("data", None),
+        )
+
     def search(
         self,
         query: str,
@@ -163,3 +191,31 @@ class AiSearch(OxyStudioAIClient):
             except Exception as e:
                 raise e
             raise TimeoutError(f"Failed to search {query=}")
+
+    async def search_instant_async(
+        self,
+        query: str,
+        geo_location: str | None = None,
+    ) -> AiSearchJob:
+        """Async version of search_instant"""
+        if not query:
+            raise ValueError("query is required")
+
+        body = {
+            "query": query,
+            "geo_location": geo_location,
+        }
+        async with self.async_client() as client:
+            response = await self.call_api_async(
+                client=client, url="/search/instant", method="POST", body=body
+            )
+            status_code = response.status_code
+            if status_code != 200:
+                raise Exception(f"Failed to perform instant search: `{response.text}`")
+
+            resp_body = response.json()
+            return AiSearchJob(
+                run_id=resp_body["run_id"],
+                message=resp_body.get("message", None),
+                data=resp_body.get("data", None),
+            )
