@@ -2,7 +2,6 @@ import asyncio
 import time
 from typing import Any
 
-import httpx
 from pydantic import BaseModel
 
 from oxylabs_ai_studio.client import OxyStudioAIClient
@@ -57,7 +56,7 @@ class AiMap(OxyStudioAIClient):
                 try:
                     get_response = self.call_api(
                         client=client,
-                        url="/map/run",
+                        url="/map/run/data",
                         method="GET",
                         params={"run_id": run_id},
                     )
@@ -72,7 +71,7 @@ class AiMap(OxyStudioAIClient):
                     return AiMapJob(
                         run_id=run_id,
                         message=resp_body.get("message", None),
-                        data=self._get_data(client=client, run_id=run_id),
+                        data=resp_body.get("data", {}) or {},
                     )
                 if resp_body["status"] == "failed":
                     return AiMapJob(
@@ -87,14 +86,6 @@ class AiMap(OxyStudioAIClient):
         except Exception as e:
             raise e
         raise TimeoutError(f"Failed to map {url}: timeout.")
-
-    def _get_data(self, client: httpx.Client, run_id: str) -> dict[str, Any]:
-        get_response = self.call_api(
-            client=client, url="/map/run/data", method="GET", params={"run_id": run_id}
-        )
-        if get_response.status_code != 200:
-            raise Exception(f"Failed to get data for run {run_id}: {get_response.text}")
-        return get_response.json().get("data", {}) or {}
 
     async def map_async(
         self,
@@ -126,7 +117,7 @@ class AiMap(OxyStudioAIClient):
                     try:
                         get_response = await self.call_api_async(
                             client=client,
-                            url="/map/run",
+                            url="/map/run/data",
                             method="GET",
                             params={"run_id": run_id},
                         )
@@ -138,11 +129,10 @@ class AiMap(OxyStudioAIClient):
                         continue
                     resp_body = get_response.json()
                     if resp_body["status"] == "completed":
-                        data = await self.get_data_async(client, run_id=run_id)
                         return AiMapJob(
                             run_id=run_id,
                             message=resp_body.get("message", None),
-                            data=data,
+                            data=resp_body.get("data", {}) or {},
                         )
                     if resp_body["status"] == "failed":
                         return AiMapJob(
@@ -157,13 +147,3 @@ class AiMap(OxyStudioAIClient):
             except Exception as e:
                 raise e
             raise TimeoutError(f"Failed to map {url}: timeout.")
-
-    async def get_data_async(
-        self, client: httpx.AsyncClient, run_id: str
-    ) -> dict[str, Any]:
-        get_response = await self.call_api_async(
-            client=client, url="/map/run/data", method="GET", params={"run_id": run_id}
-        )
-        if get_response.status_code != 200:
-            raise Exception(f"Failed to get data for run {run_id}: {get_response.text}")
-        return get_response.json().get("data", {}) or {}
