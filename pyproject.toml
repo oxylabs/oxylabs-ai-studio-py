@@ -2,7 +2,7 @@
 name = "oxylabs-ai-studio"
 version = "0.2.19"
 description = "Oxylabs studio python sdk"
-readme = "README.md"
+readme = "readme.md"
 keywords = ["oxylabs", "ai", "studio"]
 requires-python = ">=3.10"
 dependencies = [
