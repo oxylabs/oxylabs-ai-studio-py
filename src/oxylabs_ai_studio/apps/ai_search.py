@@ -46,25 +46,14 @@ class AiSearch(OxyStudioAIClient):
         body = {
             "query": query,
             "limit": limit,
-            "render_html": render_javascript,
+            "render_javascript": render_javascript,
             "return_content": return_content,
             "geo_location": geo_location,
         }
         # Use instant endpoint if limit <= 10 and return_content is False
         if limit <= 10 and not return_content:
-            client = self.get_client()
-            response = self.call_api(
-                client=client, url="/search/instant", method="POST", body=body
-            )
-            status_code = response.status_code
-            if status_code != 200:
-                raise Exception(f"Failed to perform instant search: `{response.text}`")
-
-            resp_body = response.json()
-            return AiSearchJob(
-                run_id=resp_body["run_id"],
-                message=resp_body.get("message", None),
-                data=resp_body.get("data", None),
+            return self.instant_search(
+                query=query, limit=limit, geo_location=geo_location
             )
 
         # Use regular polling endpoint
@@ -99,7 +88,7 @@ class AiSearch(OxyStudioAIClient):
                 if resp_body["status"] == "completed":
                     return AiSearchJob(
                         run_id=run_id,
-                        message=resp_body.get("message", None),
+                        message=resp_body.get("error_code", None),
                         data=resp_body["data"],
                     )
                 if resp_body["status"] == "failed":
@@ -116,6 +105,31 @@ class AiSearch(OxyStudioAIClient):
             raise e
         raise TimeoutError(f"Failed to search {query=}")
 
+    def instant_search(
+        self, query: str, limit: int = 10, geo_location: str | None = None
+    ) -> AiSearchJob:
+        """Instant SERP search without content (returns up to 10 results)."""
+        if not query:
+            raise ValueError("query is required")
+        body = {
+            "query": query,
+            "limit": limit,
+            "geo_location": geo_location,
+        }
+        client = self.get_client()
+        response = self.call_api(
+            client=client, url="/search/instant", method="POST", body=body
+        )
+        status_code = response.status_code
+        if status_code != 200:
+            raise Exception(f"Failed to perform instant search: `{response.text}`")
+        resp_body = response.json()
+        return AiSearchJob(
+            run_id=resp_body.get("run_id", ""),
+            message=resp_body.get("status", None),
+            data=resp_body.get("data", None),
+        )
+
     async def search_async(
         self,
         query: str,
@@ -131,27 +145,15 @@ class AiSearch(OxyStudioAIClient):
         body = {
             "query": query,
             "limit": limit,
-            "render_html": render_javascript,
+            "render_javascript": render_javascript,
             "return_content": return_content,
             "geo_location": geo_location,
         }
         async with self.async_client() as client:
             # Use instant endpoint if limit <= 10 and return_content is False
             if limit <= 10 and not return_content:
-                response = await self.call_api_async(
-                    client=client, url="/search/instant", method="POST", body=body
-                )
-                status_code = response.status_code
-                if status_code != 200:
-                    raise Exception(
-                        f"Failed to perform instant search: `{response.text}`"
-                    )
-
-                resp_body = response.json()
-                return AiSearchJob(
-                    run_id=resp_body["run_id"],
-                    message=resp_body.get("message", None),
-                    data=resp_body.get("data", None),
+                return await self.instant_search_async(
+                    query=query, limit=limit, geo_location=geo_location
                 )
 
             # Use regular polling endpoint
@@ -183,7 +185,7 @@ class AiSearch(OxyStudioAIClient):
                     if resp_body["status"] == "completed":
                         return AiSearchJob(
                             run_id=run_id,
-                            message=resp_body.get("message"),
+                            message=resp_body.get("error_code"),
                             data=resp_body["data"],
                         )
                     if resp_body["status"] == "failed":
@@ -200,3 +202,28 @@ class AiSearch(OxyStudioAIClient):
             except Exception as e:
                 raise e
             raise TimeoutError(f"Failed to search {query=}")
+
+    async def instant_search_async(
+        self, query: str, limit: int = 10, geo_location: str | None = None
+    ) -> AiSearchJob:
+        """Async version of instant SERP search without content."""
+        if not query:
+            raise ValueError("query is required")
+        body = {
+            "query": query,
+            "limit": limit,
+            "geo_location": geo_location,
+        }
+        async with self.async_client() as client:
+            response = await self.call_api_async(
+                client=client, url="/search/instant", method="POST", body=body
+            )
+            status_code = response.status_code
+            if status_code != 200:
+                raise Exception(f"Failed to perform instant search: `{response.text}`")
+            resp_body = response.json()
+            return AiSearchJob(
+                run_id=resp_body.get("run_id", ""),
+                message=resp_body.get("status"),
+                data=resp_body.get("data", None),
+            )

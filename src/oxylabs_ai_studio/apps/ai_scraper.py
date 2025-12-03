@@ -2,7 +2,6 @@ import asyncio
 import time
 from typing import Any, Literal
 
-import httpx
 from pydantic import BaseModel
 
 from oxylabs_ai_studio.client import OxyStudioAIClient
@@ -37,6 +36,7 @@ class AiScraper(OxyStudioAIClient):
         schema: dict[str, Any] | None = None,
         render_javascript: bool | Literal["auto"] = False,
         geo_location: str | None = None,
+        user_agent: str | None = None,
     ) -> AiScraperJob:
         if output_format in ["json", "csv", "toon"] and schema is None:
             raise ValueError(
@@ -47,8 +47,9 @@ class AiScraper(OxyStudioAIClient):
             "url": url,
             "output_format": output_format,
             "openapi_schema": schema,
-            "render_html": render_javascript,
+            "render_javascript": render_javascript,
             "geo_location": geo_location,
+            "user_agent": user_agent,
         }
         client = self.get_client()
         create_response = self.call_api(
@@ -65,7 +66,7 @@ class AiScraper(OxyStudioAIClient):
                 try:
                     get_response = self.call_api(
                         client=client,
-                        url="/scrape/run",
+                        url="/scrape/run/data",
                         method="GET",
                         params={"run_id": run_id},
                     )
@@ -77,10 +78,11 @@ class AiScraper(OxyStudioAIClient):
                     continue
                 resp_body = get_response.json()
                 if resp_body["status"] == "completed":
+                    data = resp_body.get("data", None)
                     return AiScraperJob(
                         run_id=run_id,
-                        message=resp_body.get("message", None),
-                        data=self._get_data(client=client, run_id=run_id),
+                        message=resp_body.get("error_code", None),
+                        data=data,
                     )
                 if resp_body["status"] == "failed":
                     return AiScraperJob(
@@ -95,17 +97,6 @@ class AiScraper(OxyStudioAIClient):
         except Exception as e:
             raise e
         raise TimeoutError(f"Failed to scrape {url}: timeout.")
-
-    def _get_data(self, client: httpx.Client, run_id: str) -> dict[str, Any]:
-        get_response = self.call_api(
-            client=client,
-            url="/scrape/run/data",
-            method="GET",
-            params={"run_id": run_id},
-        )
-        if get_response.status_code != 200:
-            raise Exception(f"Failed to get data for run {run_id}: {get_response.text}")
-        return get_response.json().get("data", {}) or {}
 
     def generate_schema(self, prompt: str) -> dict[str, Any] | None:
         logger.info("Generating schema")
@@ -125,8 +116,9 @@ class AiScraper(OxyStudioAIClient):
             "json", "markdown", "csv", "screenshot", "toon"
         ] = "markdown",
         schema: dict[str, Any] | None = None,
-        render_javascript: bool = False,
+        render_javascript: bool | Literal["auto"] = False,
         geo_location: str | None = None,
+        user_agent: str | None = None,
     ) -> AiScraperJob:
         """Async version of scrape."""
         if output_format in ["json", "csv", "toon"] and schema is None:
@@ -138,8 +130,9 @@ class AiScraper(OxyStudioAIClient):
             "url": url,
             "output_format": output_format,
             "openapi_schema": schema,
-            "render_html": render_javascript,
+            "render_javascript": render_javascript,
             "geo_location": geo_location,
+            "user_agent": user_agent,
         }
         async with self.async_client() as client:
             create_response = await client.post(url="/scrape", json=body)
@@ -155,7 +148,7 @@ class AiScraper(OxyStudioAIClient):
                     try:
                         get_response = await self.call_api_async(
                             client=client,
-                            url="/scrape/run",
+                            url="/scrape/run/data",
                             method="GET",
                             params={"run_id": run_id},
                         )
@@ -167,10 +160,10 @@ class AiScraper(OxyStudioAIClient):
                         continue
                     resp_body = get_response.json()
                     if resp_body["status"] == "completed":
-                        data = await self.get_data_async(client, run_id=run_id)
+                        data = resp_body.get("data", None)
                         return AiScraperJob(
                             run_id=run_id,
-                            message=resp_body.get("message", None),
+                            message=resp_body.get("error_code", None),
                             data=data,
                         )
                     if resp_body["status"] == "failed":
@@ -186,19 +179,6 @@ class AiScraper(OxyStudioAIClient):
             except Exception as e:
                 raise e
             raise TimeoutError(f"Failed to scrape {url}: timeout.")
-
-    async def get_data_async(
-        self, client: httpx.AsyncClient, run_id: str
-    ) -> dict[str, Any]:
-        get_response = await self.call_api_async(
-            client=client,
-            url="/scrape/run/data",
-            method="GET",
-            params={"run_id": run_id},
-        )
-        if get_response.status_code != 200:
-            raise Exception(f"Failed to get data for run {run_id}: {get_response.text}")
-        return get_response.json().get("data", {}) or {}
 
     async def generate_schema_async(self, prompt: str) -> dict[str, Any] | None:
         """Async version of generate_schema. Uses httpx.AsyncClient."""

@@ -29,17 +29,29 @@ class AiMap(OxyStudioAIClient):
     def map(
         self,
         url: str,
-        user_prompt: str,
-        return_sources_limit: int = 25,
+        search_keywords: list[str] | None = None,
+        user_prompt: str | None = None,
+        max_crawl_depth: int = 1,
+        limit: int = 25,
         geo_location: str | None = None,
         render_javascript: bool = False,
+        include_sitemap: bool = True,
+        max_credits: int | None = None,
+        allow_subdomains: bool = False,
+        allow_external_domains: bool = False,
     ) -> AiMapJob:
         body = {
             "url": url,
+            "search_keywords": (search_keywords or []),
             "user_prompt": user_prompt,
-            "return_sources_limit": return_sources_limit,
+            "max_crawl_depth": max_crawl_depth,
+            "limit": limit,
             "geo_location": geo_location,
-            "render_html": render_javascript,
+            "render_javascript": render_javascript,
+            "include_sitemap": include_sitemap,
+            "max_credits": max_credits,
+            "allow_subdomains": allow_subdomains,
+            "allow_external_domains": allow_external_domains,
         }
         client = self.get_client()
         create_response = self.call_api(
@@ -70,7 +82,7 @@ class AiMap(OxyStudioAIClient):
                 if resp_body["status"] == "completed":
                     return AiMapJob(
                         run_id=run_id,
-                        message=resp_body.get("message", None),
+                        message=resp_body.get("error_code", None),
                         data=resp_body.get("data", {}) or {},
                     )
                 if resp_body["status"] == "failed":
@@ -90,17 +102,29 @@ class AiMap(OxyStudioAIClient):
     async def map_async(
         self,
         url: str,
-        user_prompt: str,
-        return_sources_limit: int = 25,
+        search_keywords: list[str] | None = None,
+        user_prompt: str | None = None,
+        max_crawl_depth: int = 1,
+        limit: int = 25,
         geo_location: str | None = None,
         render_javascript: bool = False,
+        include_sitemap: bool = True,
+        max_credits: int | None = None,
+        allow_subdomains: bool = False,
+        allow_external_domains: bool = False,
     ) -> AiMapJob:
         body = {
             "url": url,
+            "search_keywords": (search_keywords or []),
             "user_prompt": user_prompt,
-            "return_sources_limit": return_sources_limit,
+            "max_crawl_depth": max_crawl_depth,
+            "limit": limit,
             "geo_location": geo_location,
-            "render_html": render_javascript,
+            "render_javascript": render_javascript,
+            "include_sitemap": include_sitemap,
+            "max_credits": max_credits,
+            "allow_subdomains": allow_subdomains,
+            "allow_external_domains": allow_external_domains,
         }
         async with self.async_client() as client:
             create_response = await self.call_api_async(
@@ -131,7 +155,7 @@ class AiMap(OxyStudioAIClient):
                     if resp_body["status"] == "completed":
                         return AiMapJob(
                             run_id=run_id,
-                            message=resp_body.get("message", None),
+                            message=resp_body.get("error_code", None),
                             data=resp_body.get("data", {}) or {},
                         )
                     if resp_body["status"] == "failed":

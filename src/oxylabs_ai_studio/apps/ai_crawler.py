@@ -36,6 +36,7 @@ class AiCrawler(OxyStudioAIClient):
         render_javascript: bool = False,
         return_sources_limit: int = 25,
         geo_location: str | None = None,
+        max_credits: int | None = None,
     ) -> AiCrawlerJob:
         if output_format in ["json", "csv", "toon"] and schema is None:
             raise ValueError(
@@ -43,18 +44,18 @@ class AiCrawler(OxyStudioAIClient):
             )
 
         body = {
-            "domain": url,
+            "url": url,
             "user_prompt": user_prompt,
             "output_format": output_format,
             "openapi_schema": schema,
-            "auxiliary_prompt": user_prompt,
-            "render_html": render_javascript,
+            "render_javascript": render_javascript,
             "return_sources_limit": return_sources_limit,
             "geo_location": geo_location,
+            "max_credits": max_credits,
         }
         client = self.get_client()
         create_response = self.call_api(
-            client=client, url="/extract/run", method="POST", body=body
+            client=client, url="/crawl/run", method="POST", body=body
         )
         if create_response.status_code != 200:
             raise Exception(
@@ -68,7 +69,7 @@ class AiCrawler(OxyStudioAIClient):
                 try:
                     get_response = self.call_api(
                         client=client,
-                        url="/extract/run/data",
+                        url="/crawl/run/data",
                         method="GET",
                         params={"run_id": run_id},
                     )
@@ -88,7 +89,7 @@ class AiCrawler(OxyStudioAIClient):
                 if resp_body["status"] == "completed":
                     return AiCrawlerJob(
                         run_id=run_id,
-                        message=resp_body.get("message", None),
+                        message=resp_body.get("error_code", None),
                         data=resp_body["data"],
                     )
                 if resp_body["status"] == "failed":
@@ -108,7 +109,7 @@ class AiCrawler(OxyStudioAIClient):
         body = {"user_prompt": prompt}
         response = self.call_api(
             client=self.get_client(),
-            url="/extract/generate-params",
+            url="/crawl/generate-params",
             method="POST",
             body=body,
         )
@@ -126,6 +127,7 @@ class AiCrawler(OxyStudioAIClient):
         render_javascript: bool = False,
         return_sources_limit: int = 25,
         geo_location: str | None = None,
+        max_credits: int | None = None,
     ) -> AiCrawlerJob:
         """Async version of crawl."""
         if output_format in ["json", "csv", "toon"] and schema is None:
@@ -134,18 +136,18 @@ class AiCrawler(OxyStudioAIClient):
             )
 
         body = {
-            "domain": url,
+            "url": url,
             "user_prompt": user_prompt,
             "output_format": output_format,
             "openapi_schema": schema,
-            "auxiliary_prompt": user_prompt,
-            "render_html": render_javascript,
+            "render_javascript": render_javascript,
             "return_sources_limit": return_sources_limit,
             "geo_location": geo_location,
+            "max_credits": max_credits,
         }
         async with self.async_client() as client:
             create_response = await self.call_api_async(
-                client=client, url="/extract/run", method="POST", body=body
+                client=client, url="/crawl/run", method="POST", body=body
             )
             if create_response.status_code != 200:
                 raise Exception(
@@ -159,7 +161,7 @@ class AiCrawler(OxyStudioAIClient):
                     try:
                         get_response = await self.call_api_async(
                             client=client,
-                            url="/extract/run/data",
+                            url="/crawl/run/data",
                             method="GET",
                             params={"run_id": run_id},
                         )
@@ -179,7 +181,7 @@ class AiCrawler(OxyStudioAIClient):
                     if resp_body["status"] == "completed":
                         return AiCrawlerJob(
                             run_id=run_id,
-                            message=resp_body.get("message", None),
+                            message=resp_body.get("error_code", None),
                             data=resp_body["data"],
                         )
                     if resp_body["status"] == "failed":
@@ -200,7 +202,7 @@ class AiCrawler(OxyStudioAIClient):
         body = {"user_prompt": prompt}
         async with self.async_client() as client:
             response = await self.call_api_async(
-                client=client, url="/extract/generate-params", method="POST", body=body
+                client=client, url="/crawl/generate-params", method="POST", body=body
             )
             if response.status_code != 200:
                 raise Exception(f"Failed to generate schema: {response.text}")

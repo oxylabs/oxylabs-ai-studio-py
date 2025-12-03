@@ -14,6 +14,6 @@ result = browser_agent.run(
     user_prompt=prompt,
     output_format="json",
     schema=schema,
-    geo_location="US",
+    geo_location="Spain",
 )
 print(result.data)
