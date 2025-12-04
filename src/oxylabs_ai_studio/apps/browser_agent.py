@@ -49,7 +49,7 @@ class BrowserAgent(OxyStudioAIClient):
             "url": url,
             "output_format": output_format,
             "openapi_schema": schema,
-            "auxiliary_prompt": user_prompt,
+            "user_prompt": user_prompt,
             "geo_location": geo_location,
         }
         client = self.get_client()
@@ -86,7 +86,7 @@ class BrowserAgent(OxyStudioAIClient):
                 if resp_body["status"] == "completed":
                     return BrowserAgentJob(
                         run_id=run_id,
-                        message=resp_body.get("message", None),
+                        message=resp_body.get("error_code", None),
                         data=resp_body["data"],
                     )
                 if resp_body["status"] == "failed":
@@ -140,7 +140,7 @@ class BrowserAgent(OxyStudioAIClient):
             "url": url,
             "output_format": output_format,
             "openapi_schema": schema,
-            "auxiliary_prompt": user_prompt,
+            "user_prompt": user_prompt,
             "geo_location": geo_location,
         }
         async with self.async_client() as client:
@@ -181,7 +181,7 @@ class BrowserAgent(OxyStudioAIClient):
                     if resp_body["status"] == "completed":
                         return BrowserAgentJob(
                             run_id=run_id,
-                            message=resp_body.get("message", None),
+                            message=resp_body.get("error_code", None),
                             data=resp_body["data"],
                         )
                     if resp_body["status"] == "failed":

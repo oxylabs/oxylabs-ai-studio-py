@@ -10,7 +10,7 @@ result = crawler.crawl(
     output_format="markdown",
     render_javascript=False,
     return_sources_limit=3,
-    geo_location="US",
+    geo_location="France",
 )
 print("Results:")
 for item in result.data:
