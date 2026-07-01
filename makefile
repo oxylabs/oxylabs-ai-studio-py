@@ -14,7 +14,7 @@ build: lint clean
 	@uv build
 
 publish-test:
-	@twine upload --repository-url https://test.pypi.org/legacy/ -u __token__ -p $(PYPI_TOKEN) dist/* 
+	@uv run twine upload --repository-url https://test.pypi.org/legacy/ -u __token__ -p $(PYPI_TOKEN) dist/* 
 
 publish: build
-	@twine upload -u __token__ -p $(PYPI_TOKEN) dist/*
+	@uv run twine upload -u __token__ -p $(PYPI_TOKEN) dist/*
