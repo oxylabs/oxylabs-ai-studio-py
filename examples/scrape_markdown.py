@@ -8,5 +8,6 @@ result = scraper.scrape(
     output_format="markdown",
     render_javascript=False,
     geo_location="Germany",
+    optimize_content=True,
 )
 print(result)

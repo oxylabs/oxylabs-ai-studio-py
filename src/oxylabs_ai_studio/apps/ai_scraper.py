@@ -37,6 +37,7 @@ class AiScraper(OxyStudioAIClient):
         render_javascript: bool | Literal["auto"] = False,
         geo_location: str | None = None,
         user_agent: str | None = None,
+        optimize_content: bool = True,
     ) -> AiScraperJob:
         if output_format in ["json", "csv", "toon"] and schema is None:
             raise ValueError(
@@ -50,6 +51,7 @@ class AiScraper(OxyStudioAIClient):
             "render_javascript": render_javascript,
             "geo_location": geo_location,
             "user_agent": user_agent,
+            "optimize_content": optimize_content,
         }
         client = self.get_client()
         create_response = self.call_api(
@@ -119,6 +121,7 @@ class AiScraper(OxyStudioAIClient):
         render_javascript: bool | Literal["auto"] = False,
         geo_location: str | None = None,
         user_agent: str | None = None,
+        optimize_content: bool = True,
     ) -> AiScraperJob:
         """Async version of scrape."""
         if output_format in ["json", "csv", "toon"] and schema is None:
@@ -133,6 +136,7 @@ class AiScraper(OxyStudioAIClient):
             "render_javascript": render_javascript,
             "geo_location": geo_location,
             "user_agent": user_agent,
+            "optimize_content": optimize_content,
         }
         async with self.async_client() as client:
             create_response = await client.post(url="/scrape", json=body)

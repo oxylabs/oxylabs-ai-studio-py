@@ -67,6 +67,7 @@ result = scraper.scrape(
     output_format="json",
     schema=schema,
     render_javascript=False,
+    optimize_content=True,
 )
 print(result)
 
@@ -78,6 +79,7 @@ print(result)
 - `render_javascript` (bool | string): Render JavaScript. Can be set to "auto", meaning the service will detect if rendering is needed (default: False)
 - `geo_location` (str): Proxy location in ISO2 format or country canonical name. See [docs](https://developers.oxylabs.io/scraping-solutions/web-scraper-api/features/localization/proxy-location#list-of-supported-geo_location-values)
 - `user_agent` (str): User-Agent request header. See more at https://developers.oxylabs.io/scraping-solutions/web-scraper-api/features/http-context-and-job-management/user-agent-type.
+- `optimize_content` (bool): Return cleaner markdown by focusing on the main page content. Output will be smaller in size when set to True (default: True)
 
 ### Browser Agent (`BrowserAgent.run`)
 

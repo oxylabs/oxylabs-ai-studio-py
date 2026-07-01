@@ -448,7 +448,7 @@ wheels = [
 
 [[package]]
 name = "oxylabs-ai-studio"
-version = "0.2.20"
+version = "0.2.21"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },

@@ -1,6 +1,6 @@
 [project]
 name = "oxylabs-ai-studio"
-version = "0.2.20"
+version = "0.2.21"
 description = "Oxylabs studio python sdk"
 readme = "readme.md"
 keywords = ["oxylabs", "ai", "studio"]
