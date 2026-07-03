@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from oxylabs_ai_studio.client import OxyStudioAIClient
 from oxylabs_ai_studio.logger import get_logger
-from oxylabs_ai_studio.models import SchemaResponse
+from oxylabs_ai_studio.models import BrowserInstruction, SchemaResponse
 
 SCRAPE_TIMEOUT_SECONDS = 60 * 3
 POLL_INTERVAL_SECONDS = 5
@@ -14,11 +14,42 @@ POLL_MAX_ATTEMPTS = SCRAPE_TIMEOUT_SECONDS // POLL_INTERVAL_SECONDS
 
 logger = get_logger(__name__)
 
+ScrapeOutputFormat = Literal["json", "markdown", "csv", "screenshot", "toon"]
+
 
 class AiScraperJob(BaseModel):
     run_id: str
     message: str | None = None
     data: dict[str, Any] | str | None
+
+
+def _build_scrape_body(
+    *,
+    url: str,
+    output_format: ScrapeOutputFormat,
+    schema: dict[str, Any] | None,
+    render_javascript: bool | Literal["auto"],
+    geo_location: str | None,
+    user_agent: str | None,
+    optimize_content: bool,
+    browser_instructions: list[BrowserInstruction] | None,
+) -> dict[str, Any]:
+    if output_format in ["json", "csv", "toon"] and schema is None:
+        raise ValueError(
+            "openapi_schema is required when output_format is json, csv or toon.",
+        )
+
+    body: dict[str, Any] = {
+        "url": url,
+        "output_format": output_format,
+        "openapi_schema": schema,
+        "render_javascript": render_javascript,
+        "geo_location": geo_location,
+        "user_agent": user_agent,
+        "optimize_content": optimize_content,
+        "browser_instructions": browser_instructions,
+    }
+    return body
 
 
 class AiScraper(OxyStudioAIClient):
@@ -30,29 +61,24 @@ class AiScraper(OxyStudioAIClient):
     def scrape(
         self,
         url: str,
-        output_format: Literal[
-            "json", "markdown", "csv", "screenshot", "toon"
-        ] = "markdown",
+        output_format: ScrapeOutputFormat = "markdown",
         schema: dict[str, Any] | None = None,
         render_javascript: bool | Literal["auto"] = False,
         geo_location: str | None = None,
         user_agent: str | None = None,
         optimize_content: bool = True,
+        browser_instructions: list[BrowserInstruction] | None = None,
     ) -> AiScraperJob:
-        if output_format in ["json", "csv", "toon"] and schema is None:
-            raise ValueError(
-                "openapi_schema is required when output_format is json, csv or toon.",
-            )
-
-        body = {
-            "url": url,
-            "output_format": output_format,
-            "openapi_schema": schema,
-            "render_javascript": render_javascript,
-            "geo_location": geo_location,
-            "user_agent": user_agent,
-            "optimize_content": optimize_content,
-        }
+        body = _build_scrape_body(
+            url=url,
+            output_format=output_format,
+            schema=schema,
+            render_javascript=render_javascript,
+            geo_location=geo_location,
+            user_agent=user_agent,
+            optimize_content=optimize_content,
+            browser_instructions=browser_instructions,
+        )
         client = self.get_client()
         create_response = self.call_api(
             client=client, url="/scrape", method="POST", body=body
@@ -114,30 +140,25 @@ class AiScraper(OxyStudioAIClient):
     async def scrape_async(
         self,
         url: str,
-        output_format: Literal[
-            "json", "markdown", "csv", "screenshot", "toon"
-        ] = "markdown",
+        output_format: ScrapeOutputFormat = "markdown",
         schema: dict[str, Any] | None = None,
         render_javascript: bool | Literal["auto"] = False,
         geo_location: str | None = None,
         user_agent: str | None = None,
         optimize_content: bool = True,
+        browser_instructions: list[BrowserInstruction] | None = None,
     ) -> AiScraperJob:
         """Async version of scrape."""
-        if output_format in ["json", "csv", "toon"] and schema is None:
-            raise ValueError(
-                "openapi_schema is required when output_format is json, csv or toon.",
-            )
-
-        body = {
-            "url": url,
-            "output_format": output_format,
-            "openapi_schema": schema,
-            "render_javascript": render_javascript,
-            "geo_location": geo_location,
-            "user_agent": user_agent,
-            "optimize_content": optimize_content,
-        }
+        body = _build_scrape_body(
+            url=url,
+            output_format=output_format,
+            schema=schema,
+            render_javascript=render_javascript,
+            geo_location=geo_location,
+            user_agent=user_agent,
+            optimize_content=optimize_content,
+            browser_instructions=browser_instructions,
+        )
         async with self.async_client() as client:
             create_response = await client.post(url="/scrape", json=body)
             if create_response.status_code != 200:
