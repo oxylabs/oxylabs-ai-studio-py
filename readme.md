@@ -80,6 +80,7 @@ print(result)
 - `geo_location` (str): Proxy location in ISO2 format or country canonical name. See [docs](https://developers.oxylabs.io/scraping-solutions/web-scraper-api/features/localization/proxy-location#list-of-supported-geo_location-values)
 - `user_agent` (str): User-Agent request header. See more at https://developers.oxylabs.io/scraping-solutions/web-scraper-api/features/http-context-and-job-management/user-agent-type.
 - `optimize_content` (bool): Return cleaner markdown by focusing on the main page content. Output will be smaller in size when set to True (default: True)
+- `browser_instructions` (list[BrowserInstruction] | None): Browser actions to run before capture (click, input, wait, etc.). Requires `render_javascript=True`. Format follows [Web Scraper API browser instructions](https://developers.oxylabs.io/products/web-scraper-api/features/js-rendering-and-browser-control#browser-instructions).
 
 ### Browser Agent (`BrowserAgent.run`)
 
